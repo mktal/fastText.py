@@ -252,8 +252,7 @@ std::vector<std::vector<std::string>>
 void trainWrapper(int argc, char **argv, int silent)
 {
     /* output file stream to redirect output from fastText library */
-    std::string temp_file_name = std::tmpnam(nullptr);
-    std::ofstream new_ofs(temp_file_name);
+    std::ofstream new_ofs("/dev/null");
     std::streambuf* old_ofs = std::cout.rdbuf();
 
     /* if silent > 0, the log from train() function will be supressed */
