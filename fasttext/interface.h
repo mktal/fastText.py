@@ -39,6 +39,9 @@ class FastTextModel {
         double t;
 
         std::vector<std::string> getWords();
+        std::vector<std::string> getTokens(std::string text);
+        std::vector<std::vector<real>> getTokenVectors(std::string text);
+        std::vector<std::vector<real>> getLabelVectors();
         std::vector<real> getVectorWrapper(std::string word);
         std::vector<double> classifierTest(std::string filename, int32_t k);
         std::vector<std::string> classifierPredict(std::string text, int32_t k);

@@ -161,6 +161,90 @@ std::vector<double> FastTextModel::classifierTest(std::string filename,
     return result;
 }
 
+std::vector<std::vector<real> > FastTextModel::getLabelVectors() {
+    std::vector<std::vector<real> > res;
+    int32_t nl = _dict->nlabels();
+    Vector vec(dim);
+    for (int32_t i = 0; i < nl; i++) {
+        vec.zero();
+        vec.addRow(*_output_matrix, i);
+        res.push_back(std::vector<real>(vec.data_, vec.data_ + vec.m_));
+    }
+    return res;
+}
+
+std::vector<std::vector<real> > FastTextModel::getTokenVectors(std::string text) {
+    /* Hardcoded here; since we need this variable but the variable
+     * is private in dictionary.h */
+    const int32_t max_line_size = 1024;
+
+     /* List of word ids */
+    std::vector<int32_t> text_word_ids;
+    std::istringstream iss(text);
+    std::string token;
+
+    /* We implement the same logic as Dictionary::getLine */
+    std::uniform_real_distribution<> uniform(0, 1);
+    while(iss >> token) {
+        int32_t word_id = _dict->getId(token);
+        if(word_id < 0) continue;
+        entry_type type = _dict->getType(word_id);
+        if (type == entry_type::word &&
+                !_dict->discard(word_id, uniform(_model->rng))) {
+            text_word_ids.push_back(word_id);
+        }
+        if(text_word_ids.size() > max_line_size) break;
+    }
+    _dict->addNgrams(text_word_ids, wordNgrams);
+
+    std::vector<std::vector<real> > res;
+    Vector vec(dim);
+    for (auto i : text_word_ids) {
+        vec.zero();
+        vec.addRow(*_input_matrix, i);
+        res.push_back(std::vector<real>(vec.data_, vec.data_ + vec.m_));
+    }
+
+    return res;
+
+}
+
+
+std::vector<std::string> FastTextModel::getTokens(std::string text) {
+    /* Hardcoded here; since we need this variable but the variable
+     * is private in dictionary.h */
+    const int32_t max_line_size = 1024;
+
+    std::istringstream iss(text);
+    std::string token;
+    std::vector<std::string> tokens;
+
+    /* We implement the same logic as Dictionary::getLine */
+    std::uniform_real_distribution<> uniform(0, 1);
+    while(iss >> token) {
+        int32_t word_id = _dict->getId(token);
+        if(word_id < 0) continue;
+        entry_type type = _dict->getType(word_id);
+        if (type == entry_type::word &&
+                !_dict->discard(word_id, uniform(_model->rng))) {
+            tokens.push_back(token);
+        }
+        if(tokens.size() > max_line_size) break;
+    }
+    // _dict->addNgrams(text_word_ids, wordNgrams);
+    int32_t line_size = tokens.size();
+    for (int32_t i = 0; i < line_size; i++) {
+        std::string h = tokens[i];
+        for (int32_t j = i + 1; j < line_size && j < i + wordNgrams; j++) {
+            h += " " + tokens[j];
+            tokens.push_back(h);
+        }
+    }
+
+    return tokens;
+
+}
+
 std::vector<std::string> FastTextModel::classifierPredict(std::string text,
         int32_t k)
 {
