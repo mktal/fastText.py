@@ -41,6 +41,7 @@ cdef extern from "interface.h":
         vector[string] getWords()
         vector[string] getTokens(string text)
         vector[vector[real]] getTokenVectors(string text)
+        vector[real] getTextVector(string word)
         vector[vector[real]] getLabelVectors()
         vector[real] getVectorWrapper(string word)
         vector[double] classifierTest(string filename, int32_t k)

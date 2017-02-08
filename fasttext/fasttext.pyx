@@ -33,6 +33,10 @@ cdef class FastTextModelWrapper:
     def get_label_vectors(self):
         return self.fm.getLabelVectors()
 
+    def get_text_vector(self, text, encoding):
+        text_bytes = bytes(text, encoding)
+        return self.fm.getTextVector(text_bytes)
+
     # dict_* methods is a wrapper for the Dictionary class methods;
     # We can't access dicrectly Dictionary in python because
     # Dictionary class doesn't have a nullary constructor
