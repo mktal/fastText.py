@@ -1,4 +1,5 @@
 /* An interface for fastText */
+#include <streambuf>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -249,28 +250,34 @@ std::vector<std::vector<std::string>>
     return results;
 }
 
+template <class cT, class traits = std::char_traits<cT> >
+class basic_nullbuf: public std::basic_streambuf<cT, traits> {
+    typename traits::int_type overflow(typename traits::int_type c)
+    {
+        return traits::not_eof(c); // indicate success
+    }
+};
+
 void trainWrapper(int argc, char **argv, int silent)
 {
-    /* output file stream to redirect output from fastText library */
-    std::ofstream new_ofs("/dev/null");
-    std::streambuf* old_ofs = std::cout.rdbuf();
-
     /* if silent > 0, the log from train() function will be supressed */
     if(silent > 0) {
-        std::cout.rdbuf(new_ofs.rdbuf());
+        /* output file stream to redirect output from fastText library */
+        std::streambuf* old_ofs = std::cout.rdbuf();
+        std::streambuf* null_ofs = new basic_nullbuf<char>();
+        std::cout.rdbuf(null_ofs);
         std::shared_ptr<Args> a = std::make_shared<Args>();
         a->parseArgs(argc, argv);
         FastText fasttext;
         fasttext.train(a);
         std::cout.rdbuf(old_ofs);
+        delete null_ofs;
     } else {
         std::shared_ptr<Args> a = std::make_shared<Args>();
         a->parseArgs(argc, argv);
         FastText fasttext;
         fasttext.train(a);
     }
-
-    new_ofs.close();
 }
 
 /* The logic is the same as FastText::loadModel, we roll our own
