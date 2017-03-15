@@ -5,4 +5,4 @@ from .fasttext import supervised
 
 import os
 
-__VERSION__ = '0.8.2'
+__VERSION__ = '0.8.3'

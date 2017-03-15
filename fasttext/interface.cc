@@ -176,7 +176,7 @@ std::vector<std::string> FastTextModel::classifierPredict(std::string text,
 
     /* We implement the same logic as Dictionary::getLine */
     std::uniform_real_distribution<> uniform(0, 1);
-    while(iss >> token) {
+    while(_dict->readWord(iss, token)) {
         int32_t word_id = _dict->getId(token);
         if(word_id < 0) continue;
         entry_type type = _dict->getType(word_id);
@@ -217,7 +217,7 @@ std::vector<std::vector<std::string>>
 
     /* We implement the same logic as Dictionary::getLine */
     std::uniform_real_distribution<> uniform(0, 1);
-    while(iss >> token) {
+    while(_dict->readWord(iss, token)) {
         int32_t word_id = _dict->getId(token);
         if(word_id < 0) continue;
         entry_type type = _dict->getType(word_id);
